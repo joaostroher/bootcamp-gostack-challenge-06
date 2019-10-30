@@ -22,6 +22,7 @@ export default function User({ navigation }) {
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [refreshing, setRefreshing] = useState(false);
+  const [endOfPages, setEndOfPages] = useState(false);
 
   const user = navigation.getParam('user');
 
@@ -32,23 +33,25 @@ export default function User({ navigation }) {
         page,
       },
     });
-    if (response.data.length === 0) setPage(-1);
-    setStars([...stars, ...response.data]);
+    if (response.data.length === 0) setEndOfPages(true);
+    if (page === 1) setStars(response.data);
+    else setStars([...stars, ...response.data]);
     setLoading(false);
   }
 
   useEffect(() => {
-    if (page !== -1) fetchData();
+    fetchData();
   }, [page]);
 
   function nextPage() {
-    if (page !== -1) setPage(page + 1);
+    if (!endOfPages) setPage(page + 1);
   }
 
   function refreshList() {
     setRefreshing(true);
-    setStars([]);
-    setPage(1);
+    setEndOfPages(false);
+    if (page === 1) fetchData();
+    else setPage(1);
     setRefreshing(false);
   }
 
